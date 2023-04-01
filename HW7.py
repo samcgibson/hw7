@@ -138,7 +138,12 @@ def birthyear_nationality_search(age, country, cur, conn):
     # HINT: You'll have to use JOIN for this task.
 
 def position_birth_search(position, age, cur, conn):
-       pass
+    ptup3_list = []
+    cur.execute(f"SELECT name, position, birthyear FROM Positions JOIN Players ON Positions.id = Players.position_id WHERE Positions.position = '{position}' AND birthyear>'{2023-age}'")
+    for row in cur:
+        ptup3_list.append(row)
+
+    return ptup3_list
 
 
 # [EXTRA CREDIT]
@@ -225,19 +230,19 @@ class TestAllMethods(unittest.TestCase):
         self.assertEqual(a[3][2], 1992)
         self.assertEqual(len(a[1]), 3)
 
-    # def test_type_speed_defense_search(self):
-    #     b = sorted(position_birth_search('Goalkeeper', 35, self.cur, self.conn))
-    #     self.assertEqual(len(b), 2)
-    #     self.assertEqual(type(b[0][0]), str)
-    #     self.assertEqual(type(b[1][1]), str)
-    #     self.assertEqual(len(b[1]), 3) 
-    #     self.assertEqual(b[1], ('Jack Butland', 'Goalkeeper', 1993)) 
+    def test_type_speed_defense_search(self):
+        b = sorted(position_birth_search('Goalkeeper', 35, self.cur, self.conn))
+        self.assertEqual(len(b), 2)
+        self.assertEqual(type(b[0][0]), str)
+        self.assertEqual(type(b[1][1]), str)
+        self.assertEqual(len(b[1]), 3) 
+        self.assertEqual(b[1], ('Jack Butland', 'Goalkeeper', 1993)) 
 
-    #     c = sorted(position_birth_search("Defence", 23, self.cur, self.conn))
-    #     self.assertEqual(len(c), 1)
-    #     self.assertEqual(c, [('Teden Mengi', 'Defence', 2002)])
+        c = sorted(position_birth_search("Defence", 23, self.cur, self.conn))
+        self.assertEqual(len(c), 1)
+        self.assertEqual(c, [('Teden Mengi', 'Defence', 2002)])
     
-    # # test extra credit
+    # test extra credit
     # def test_make_winners_table(self):
     #     self.cur2.execute('SELECT * from Winners')
     #     winners_list = self.cur2.fetchall()
@@ -261,7 +266,7 @@ def main():
 
     json_data = read_data('football.json')
     cur, conn = open_database('Football.db')
-    make_positions_table(json_data, cur, conn)
+    make_positions_table(json_data, cur, conn) 
     make_players_table(json_data, cur, conn)
     conn.close()
 
