@@ -34,24 +34,6 @@ def make_positions_table(data, cur, conn):
         cur.execute("INSERT OR IGNORE INTO Positions (id, position) VALUES (?,?)",(i, positions[i]))
     conn.commit()
 
-## [TASK 1]: 25 points
-# Finish the function make_players_table
-
-#     This function takes 3 arguments: JSON data,
-#         the database cursor, and the database connection object
-
-#     It iterates through the JSON data to get a list of players in the squad
-#     and loads them into a database table called 'Players'
-#     with the following columns:
-#         id ((datatype: int; Primary key) - note this comes from the JSON
-#         name (datatype: text)
-#         position_id (datatype: integer)
-#         birthyear (datatype: int)
-#         nationality (datatype: text)
-#     To find the position_id for each player, you will have to look up 
-#     the position in the Positions table we 
-#     created for you -- see make_positions_table above for details.
-
 def make_players_table(data, cur, conn):
     position_list = []
     cur.execute("CREATE TABLE IF NOT EXISTS Players (id INTEGER PRIMARY KEY, name TEXT, position_id INTEGER, birthyear INTEGER, nationality TEXT)")
@@ -75,16 +57,6 @@ def make_players_table(data, cur, conn):
         c +=1
     conn.commit()
 
-## [TASK 2]: 10 points
-# Finish the function nationality_search
-
-    # This function takes 3 arguments as input: a list of countries,
-    # the database cursor, and database connection object. 
- 
-    # It selects all the players from any of the countries in the list
-    # and returns a list of tuples. Each tuple contains:
-        # the player's name, their position_id, and their nationality.
-
 def nationality_search(countries, cur, conn):
     ptup_list = []
     for country in countries:
@@ -95,22 +67,6 @@ def nationality_search(countries, cur, conn):
 
     return ptup_list
 
-## [TASK 3]: 10 points
-# finish the function birthyear_nationality_search
-
-#     This function takes 4 arguments as input: 
-#     an age in years (int), 
-#     a country (string), the database cursor, 
-#     and the database connection object.
-
-#     It selects all the players from the country passed to the function 
-#     that were born BEFORE (2023 minus the year passed)
-#     for example: if we pass 19 for the year, it should return 
-#     players with birthdates BEFORE 2004
-#     This function returns a list of tuples each containing 
-#     the player’s name, nationality, and birth year. 
-
-
 def birthyear_nationality_search(age, country, cur, conn):
     ptup2_list = []
     cur.execute(f'SELECT * FROM Players WHERE nationality="{country}" AND birthyear<"{2023-age}"')
@@ -120,23 +76,6 @@ def birthyear_nationality_search(age, country, cur, conn):
 
     return ptup2_list
 
-## [TASK 4]: 15 points
-# finish the function position_birth_search
-
-    # This function takes 4 arguments as input: 
-    # a position (string), 
-    # age (int), the database cursor,
-    # and the database connection object. 
-
-    # It selects all the players who play the position
-    #  passed to the function and
-    # that were born AFTER (2023 minus the year passed)
-    # for example: if we pass 19 for the year, it should return 
-    # players with birth years AFTER 2004
-    # This function returns a list of tuples each containing 
-    # the player’s name, position, and birth year. 
-    # HINT: You'll have to use JOIN for this task.
-
 def position_birth_search(position, age, cur, conn):
     ptup3_list = []
     cur.execute(f"SELECT name, position, birthyear FROM Positions JOIN Players ON Positions.id = Players.position_id WHERE Positions.position = '{position}' AND birthyear>'{2023-age}'")
@@ -145,44 +84,13 @@ def position_birth_search(position, age, cur, conn):
 
     return ptup3_list
 
-
-# [EXTRA CREDIT]
-# You’ll make 3 new functions, make_winners_table(), make_seasons_table(),
-# and winners_since_search(), 
-# and then write at least 2 meaningful test cases for each of them. 
-
-#     The first function takes 3 arguments: JSON data, 
-#     the database cursor, and the database connection object.
-#     It makes a table with 2 columns:
-#         id (datatype: int; Primary key) -- note this comes from the JSON
-#         name (datatype: text) -- note: use the full, not short, name
-#     hint: look at how we made the Positions table above for an example
-
-#     The second function takes the same 3 arguments: JSON data, 
-#     the database cursor, and the database connection object. 
-#     It iterates through the JSON data to get info 
-#     about previous Premier League seasons (don't include the current one)
-#     and loads all of the seasons into a database table 
-#     called ‘Seasons' with the following columns:
-#         id (datatype: int; Primary key) - note this comes from the JSON
-#         winner_id (datatype: text)
-#         end_year (datatype: int)
-#     NOTE: Skip seasons with no winner!
-
-#     To find the winner_id for each season, you will have to 
-#     look up the winner's name in the Winners table
-#     see make_winners_table above for details
-    
-#     The third function takes in a year (string), the database cursor, 
-#     and the database connection object. It returns a dictionary of how many 
-#     times each team has won the Premier League since the passed year.
-#     In the dict, each winning team's (full) name is a key,
-#     and the value associated with each team is the number of times
-#     they have won since the year passed, including the season that ended
-#     the passed year. 
-
+#EXTRA CREDIT
 def make_winners_table(data, cur, conn):
-    pass
+    cur.execute("CREATE TABLE IF NOT EXISTS Winners (id INTEGER PRIMARY KEY, name TEXT)")
+    for season in data['seasons']:
+        if season['winner'] != None:
+            cur.execute("INSERT OR IGNORE INTO Winners (id, name) VALUES (?,?)", (season['id'], season['winner']['name']))
+    conn.commit()
 
 def make_seasons_table(data, cur, conn):
     pass
@@ -242,12 +150,17 @@ class TestAllMethods(unittest.TestCase):
         self.assertEqual(len(c), 1)
         self.assertEqual(c, [('Teden Mengi', 'Defence', 2002)])
     
-    # test extra credit
-    # def test_make_winners_table(self):
-    #     self.cur2.execute('SELECT * from Winners')
-    #     winners_list = self.cur2.fetchall()
+    # # test extra credit
+    def test_make_winners_table(self):
+        self.cur2.execute('SELECT * from Winners')
+        winners_list = self.cur2.fetchall()
+        self.assertEqual(len(winners_list), 28)
+        self.assertEqual(type(winners_list[0]), tuple)
+        self.assertEqual(type(winners_list[0][0]), int)
+        self.assertEqual(type(winners_list[0][1]), str)
+        self.assertEqual(winners_list[1][1], 'Manchester City FC')
+        self.assertEqual(winners_list[-1][0], 619)
 
-    #     pass
 
     # def test_make_seasons_table(self):
     #     self.cur2.execute('SELECT * from Seasons')
