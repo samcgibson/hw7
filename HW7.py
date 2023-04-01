@@ -1,7 +1,7 @@
 
-# Your name:
-# Your student id:
-# Your email:
+# Your name: Sam Gibson
+# Your student id: 42836823
+# Your email: samcg@umich.edu
 # List who you have worked with on this project:
 
 import unittest
@@ -86,7 +86,14 @@ def make_players_table(data, cur, conn):
         # the player's name, their position_id, and their nationality.
 
 def nationality_search(countries, cur, conn):
-    pass
+    ptup_list = []
+    for country in countries:
+        cur.execute(f'SELECT * FROM Players WHERE nationality = "{country}"')
+        for row in cur:
+            ptup = (row[1], row[2], row[4])
+            ptup_list.append(ptup)
+
+    return ptup_list
 
 ## [TASK 3]: 10 points
 # finish the function birthyear_nationality_search
@@ -181,28 +188,28 @@ class TestAllMethods(unittest.TestCase):
         self.conn2 = sqlite3.connect(path+'/'+'Football_seasons.db')
         self.cur2 = self.conn2.cursor()
 
-    # def test_players_table(self):
-    #     self.cur.execute('SELECT * from Players')
-    #     players_list = self.cur.fetchall()
+    def test_players_table(self):
+        self.cur.execute('SELECT * from Players')
+        players_list = self.cur.fetchall()
 
-    #     self.assertEqual(len(players_list), 30)
-    #     self.assertEqual(len(players_list[0]),5)
-    #     self.assertIs(type(players_list[0][0]), int)
-    #     self.assertIs(type(players_list[0][1]), str)
-    #     self.assertIs(type(players_list[0][2]), int)
-    #     self.assertIs(type(players_list[0][3]), int)
-    #     self.assertIs(type(players_list[0][4]), str)
+        self.assertEqual(len(players_list), 30)
+        self.assertEqual(len(players_list[0]),5)
+        self.assertIs(type(players_list[0][0]), int)
+        self.assertIs(type(players_list[0][1]), str)
+        self.assertIs(type(players_list[0][2]), int)
+        self.assertIs(type(players_list[0][3]), int)
+        self.assertIs(type(players_list[0][4]), str)
 
-    # def test_nationality_search(self):
-    #     x = sorted(nationality_search(['England'], self.cur, self.conn))
-    #     self.assertEqual(len(x), 11)
-    #     self.assertEqual(len(x[0]), 3)
-    #     self.assertEqual(x[0][0], "Aaron Wan-Bissaka")
+    def test_nationality_search(self):
+        x = sorted(nationality_search(['England'], self.cur, self.conn))
+        self.assertEqual(len(x), 11)
+        self.assertEqual(len(x[0]), 3)
+        self.assertEqual(x[0][0], "Aaron Wan-Bissaka")
 
-    #     y = sorted(nationality_search(['Brazil'], self.cur, self.conn))
-    #     self.assertEqual(len(y), 3)
-    #     self.assertEqual(y[2],('Fred', 2, 'Brazil'))
-    #     self.assertEqual(y[0][1], 3)
+        y = sorted(nationality_search(['Brazil'], self.cur, self.conn))
+        self.assertEqual(len(y), 3)
+        self.assertEqual(y[2],('Fred', 2, 'Brazil'))
+        self.assertEqual(y[0][1], 3)
 
     # def test_birthyear_nationality_search(self):
 
